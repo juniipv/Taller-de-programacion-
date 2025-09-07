@@ -1,0 +1,134 @@
+{3.- Netflix ha publicado la lista de películas que estarán disponibles durante el mes de
+septiembre de 2025. De cada película se conoce: código de película, código de género (1:
+acción, 2: aventura, 3: drama, 4: suspenso, 5: comedia, 6: bélico, 7: documental y 8: terror) y
+puntaje promedio otorgado por las críticas.
+Implementar un programa que invoque a módulos para cada uno de los siguientes puntos:
+a. Lea los datos de películas, los almacene por orden de llegada y agrupados por código de
+género, y retorne en una estructura de datos adecuada. La lectura finaliza cuando se lee el
+código de la película -1.
+b. Genere y retorne en un vector, para cada género, el código de película con mayor puntaje
+obtenido entre todas las críticas, a partir de la estructura generada en a)..
+c. Ordene los elementos del vector generado en b) por puntaje utilizando alguno de los dos
+métodos vistos en la teoría.
+d. Muestre el código de película con mayor puntaje y el código de película con menor puntaje,
+del vector obtenido en el punto c).}
+program ejer3;
+type
+ subrango= 1..8;
+ pelicula= record
+  cod: integer;
+  genero: subrango;
+  puntaje: real;
+ end;
+ lista= ^nodo;
+  nodo= record
+   dato: pelicula;
+   sig: lista;
+  end;
+  vecgenero= array [subrango] of lista; 
+  peli= record
+   pelicod: integer;
+   pelipuntaje: real; 
+  end; 
+  veccontador= array [subrango] of peli;
+  
+  procedure leerdatos (var p:pelicula);
+   begin 
+    writeln ('Ingrese el codigo de pelicula:');
+    read (p.cod);
+    if (p.cod <> -1) then begin 
+     writeln('Ingrese el codigo de genero (del 1 al 8');
+     readln(p.genero);
+     writeln('Ingrese el puntaje promedio otorgado por las criticas:');
+     readln(p.puntaje);
+    end;
+   end;
+  procedure inicializarvector (var v:vecgenero);
+   var
+    i: integer;
+   begin
+    for i:=1 to 8 do 
+     v [i]:= nil;
+   end; 
+  procedure agregaralfinal (var l: lista; p: pelicula);
+  var
+	aux, ult: lista;
+  begin
+	new(aux); 
+	aux^.dato:= p; 
+	aux^.sig:= nil;
+	if(l = nil) then 
+	 l:= aux
+	else begin
+		ult:= l;
+		while (ult^.sig <> nil) do
+			ult:= ult^.sig;
+		ult^.sig:= aux;
+		end;
+    end;
+
+  procedure cargardatos(var v: vecgenero);
+   var
+    p: pelicula;
+   begin
+    leerdatos (p);
+    while (p.cod <> -1) do begin
+     agregaralfinal (v [p.genero],p);
+     leerdatos(p);
+    end;
+   end;
+  procedure maximos (l:lista; var maxcod: integer; var maxpuntaje: real);
+   begin
+    maxcod:= -1;
+    maxpuntaje:= -1;
+     while (l <> nil) do begin 
+       if (l^.dato.puntaje > maxpuntaje) then begin
+         maxpuntaje:= l^.dato.puntaje;
+         maxcod:= l^.dato.cod;
+      end;
+     l:= l^.sig; 
+   end;
+  end;
+  procedure inicializarvector2 (var vc: veccontador); 
+   var
+    i: subrango;
+   begin
+    for i:= 1 to 8 do begin 
+      vc[i].pelicod:= 0;
+      vc[i].pelipuntaje:= 0;
+     end;
+    end;
+  procedure mayorpuntajeporgenero (vg: vecgenero; var vc: veccontador);
+   var 
+    i: integer; 
+   begin 
+    for i:= 1 to 8 do
+     maximos (vg[i], vc[i].pelicod, vc [i].pelipuntaje);
+   end; 
+  procedure ordenarvector (var vc: veccontador);
+   var
+    i, j , pos: integer;
+    item: peli;
+   begin
+    for i:= 1 to 8 do begin 
+     pos:= i;
+     for j:= i + 1 to 8 do 
+      if vc[j].pelipuntaje < vc[pos].pelipuntaje then 
+       pos:= j;
+     item:= vc[pos];
+     vc[pos]:= vc[i];
+     vc[i]:= item;
+    end;
+   end;
+VAR
+ genero: vecgenero; 
+ contador: veccontador; 
+BEGIN 
+ inicializarvector(genero);
+ cargardatos (genero);
+ inicializarvector2(contador);
+ mayorpuntajeporgenero(genero, contador);
+ ordenarvector(contador);
+ writeln ('El codigo de la pelicula con mayor puntaje dado por la critica es: ', contador[1].pelicod);
+ writeln ('El codigo de la pelicula con menor puntaje dado por la critica es: ', contador[8].pelicod);
+END .
